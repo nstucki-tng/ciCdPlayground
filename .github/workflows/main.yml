@@ -4,12 +4,17 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
   
 permissions:
   checks: write
   pull-requests: write
   id-token: write
-  contents: read
+  contents: write
   pages: write
 
 jobs:
@@ -38,3 +43,22 @@ jobs:
           **/reports/**/*.xml
           **/reports/**/*.trx
           **/reports/**/*.json
+      # 1. Checkout code (with full Git history)
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Essential to fetch full history for tagging
+
+    # 2. Configure Git identity
+    - name: Setup Git user
+      run: |
+        git config user.name "nstucki-tng"
+        git config user.email "nico.stucki@tngtech.com"
+
+    # 3. Create & push the tag
+    - name: Tag commit with ${{ inputs.version }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git tag ${{ github.event.inputs.version }}
+        git push origin ${{ github.event.inputs.version }}
