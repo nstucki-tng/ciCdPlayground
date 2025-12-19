@@ -5,6 +5,16 @@ pipeline {
     }
 
     stages {
+        stage('checkout') {
+            steps {
+                git branch: 'master', url: 'https://github.com/nstucki-tng/ciCdPlayground'
+            script{
+                currentBuild.displayName = "#${currentBuild.number} ${env.GIT_URL.split('/')[3]}"
+                currentBuild.description = "Build for ${env.GIT_URL}"
+            }
+            }
+        }
+
         stage('install') {
             steps {
                 sh 'yarn'
